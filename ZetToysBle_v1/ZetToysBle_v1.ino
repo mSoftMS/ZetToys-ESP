@@ -12,7 +12,7 @@
 //joy2[Y, Z] to joystick po prawej - w przykładzie jest sterowanie dwoma silnikami DC - np. wyjście Y podłączone do obrotnicy drabiny a Z do wysuwania jej
 //buttons[A=opis 1,B=opis 2,C=opis 3] to przyciski + nazwy wyświetlane w aplikacji
 //Jezeli nie ma w konfigu deklaracji, aplikacja nie wyswietla tych kontrolek
-#define CONFIG "joy1[D,X]:joy1[Y,Z]:buttons[A=opis 1,B=opis 2,C=opis 3]"
+#define CONFIG "joy1[D,X]:joy2[Y,Z]:buttons[A=Klakson,B=Światła]:nazwa=Wóz strażacki"
 
 const int pinA = 2;
 const int pinB = 4;
@@ -80,11 +80,11 @@ class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       deviceConnected = true;
       Serial.println("Połączono");
+      BLEDevice::startAdvertising();
       pCharacteristic->setValue(CONFIG);
       // Wysyłaj konfigurację do podłączonego urządzenia
       pCharacteristic->indicate();
       Serial.println("Config wysłany");
-      BLEDevice::startAdvertising();
       Serial.println("Start nasłuchu");
     };
 
@@ -110,6 +110,11 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
       Serial.println();
     }
+  }
+  void onRead(BLECharacteristic *pCharacteristic) {
+    pCharacteristic->setValue(CONFIG);
+    pCharacteristic->indicate();
+    Serial.println("Wysłano config");
   }
 };
 void setup() {
